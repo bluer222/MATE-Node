@@ -1,5 +1,5 @@
 # MATE-Node:<br>
-Program to control MATE Robot through an ethernet cable for the Atlantic Owls team. <br>
+Program in Node js to control MATE Robot through an ethernet cable for the Atlantic Owls team. <br>
 ### How it works:<br> 
  * Website is hosted by robot
  * Surface computer accesses website through ethernet
