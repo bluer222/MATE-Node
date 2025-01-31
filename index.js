@@ -3,12 +3,19 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
+//webcam stuff
+const { spawn } = require('child_process');
 
 
-//host it
-const hostname = '127.0.0.2';
-const port = 3000;
-const wss = new WebSocket.Server({ port: 8080 });
+//config
+const ip = "127.0.0.1"
+const filePort = 3000;
+const webSocketPort = 8080;
+
+
+
+//websockets
+const wss = new WebSocket.Server({ port: webSocketPort });
 wss.on('connection', (ws) => {
   console.log('Client connected');
 
@@ -23,7 +30,7 @@ wss.on('connection', (ws) => {
     } else {
 
     }
-    //ws.send('Hello from the server!');
+    //ws.send('Hello from the server!');nix-shell -p fswebcam
   });
   function send(type, data) {
     ws.send(JSON.stringify({ type, data }));
@@ -59,33 +66,37 @@ wss.on('connection', (ws) => {
 
 //host the server(just dont touch it)
 const server = http.createServer((req, res) => {
-  const filePath = path.join(__dirname, 'src', req.url);
+  if (req.url === '/stream') {
+    streamVideo(res, req, true);
+  } else {
+    //send the file
+    const filePath = path.join(__dirname, 'src', req.url);
 
-  fs.access(filePath, (err) => {
-    if (err) {
-      res.statusCode = 404;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end('File not found');
-    } else {
-      fs.readFile(filePath, (err, data) => {
-        if (err) {
-          res.statusCode = 500;
-          res.setHeader('Content-Type', 'text/plain');
-          res.end('Error reading file');
-        } else {
-          res.statusCode = 200;
-          res.setHeader('Content-Type', getContentType(filePath));
-          res.end(data);
-        }
-      });
-    }
-  });
+    fs.access(filePath, (err) => {
+      if (err) {
+        res.statusCode = 404;
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('File not found');
+      } else {
+        fs.readFile(filePath, (err, data) => {
+          if (err) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('Error reading file');
+          } else {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', getContentType(filePath));
+            res.end(data);
+          }
+        });
+      }
+    });
+  }
 });
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+server.listen(filePort, ip, () => {
+  console.log(`Server running at http://${ip}:${filePort}/`);
 });
-
 const getContentType = (filePath) => {
   const extname = path.extname(filePath);
   switch (extname) {
@@ -103,3 +114,48 @@ const getContentType = (filePath) => {
       return 'application/octet-stream';
   }
 };
+
+function streamVideo(res, req) {
+  res.writeHead(200, {
+    'Content-Type': 'multipart/x-mixed-replace; boundary=frame',
+    'Cache-Control': 'no-cache',
+    'Connection': 'close',
+    'Pragma': 'no-cache'
+  });
+
+  const inputFormat = [
+    '-f', 'v4l2',
+    '-input_format', 'mjpeg',
+    '-fflags', 'nobuffer',
+    '-flags', 'low_delay',
+    '-strict', 'experimental',
+    '-i', '/dev/video0',
+    '-r', '30',
+    '-q:v', '3',
+    '-video_size', '4x3',
+    '-f', 'image2pipe',
+    '-vcodec', 'mjpeg',
+    '-'
+  ];
+
+  const ffmpeg = spawn('ffmpeg', inputFormat);
+
+  ffmpeg.stdout.on('data', (data) => {
+    if (!res.writableEnded) {
+      res.write('--frame\r\n');
+      res.write('Content-Type: image/jpeg\r\n');
+      res.write(`Content-Length: ${data.length}\r\n\r\n`);
+      res.write(data);
+      res.write('\r\n');
+    }
+  });
+  
+
+  req.on('close', () => {
+    ffmpeg.kill('SIGKILL');
+  });
+
+  ffmpeg.stderr.on('data', (data) => {
+    console.error(`FFmpeg stderr: ${data}`);
+  });
+}

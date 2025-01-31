@@ -6,7 +6,7 @@ let sendBuffer = [];
 //open connection to server
 openSocket();
 function openSocket() {
-    socket = new WebSocket('ws://127.0.0.2:8080');
+    socket = new WebSocket('ws://127.0.0.1:8080');
 
     //when we finish connecting
     socket.onopen = () => {
@@ -17,15 +17,13 @@ function openSocket() {
             });
             sendBuffer = [];
         }
-        console.log('Connected to WebSocket server');
+        log('Connected to server');
     };
 
     //we recived a message
     socket.onmessage = (event) => {
-        //pares it
+        //parse it
         let message = JSON.parse(event.data);
-        //log it
-        console.log('Received message:', message);
         //handle it
         if (message.type === "pong") {
             log("Ping took " + (performance.now() - pingTime) + "ms");
@@ -34,7 +32,6 @@ function openSocket() {
 
     //the socked got disconnected(this is bad)
     socket.onclose = () => {
-        console.log('Disconnected from WebSocket server');
         log("Disconnected from server(bad)");
     };
 }
@@ -42,7 +39,6 @@ function openSocket() {
 //check if the server is still there and how long it takes to get a response
 function ping() {
     pingTime = performance.now();
-    console.log("pinging");
     send("ping", "ping");
 }
 
@@ -50,12 +46,12 @@ function ping() {
 let controller = navigator.getGamepads()[0];
 //send button presses
 window.addEventListener('gamepadbuttondown', (event) => {
-    console.log('Button pressed:', event.detail.button);
+    log('Button pressed:', event.detail.button);
     send("button", event.detail.button);
 });
 //send stick movements
 window.addEventListener('gamepadaxismove', (event) => {
-    console.log('Axis moved:', event.detail.axis, event.detail.value);
+    log('Axis moved:', event.detail.axis, event.detail.value);
     send("axis", { axis: event.detail.axis, value: event.detail.value });
 });
 
@@ -74,6 +70,7 @@ function send(type, data) {
 
 //log something in the visible console
 function log(text) {
+    console.log(text);
     let cons = document.getElementById('console');
     const br = document.createElement('br');
     cons.prepend(text, br);
