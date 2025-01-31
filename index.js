@@ -1,5 +1,7 @@
 //import stuff
+//http for hosting the html
 const http = require('http');
+//fs+path for reading files
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
@@ -9,7 +11,9 @@ const { spawn } = require('child_process');
 
 //config
 const ip = "127.0.0.1"
+//port for video stream and for the file server
 const filePort = 3000;
+//port for the websocket server
 const webSocketPort = 8080;
 
 
@@ -20,18 +24,21 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
 
   ws.on('message', (message) => {
-
+    //parse
     message = JSON.parse(message);
 
+    //log
     console.log('Received message:', message.type);
+
+    //respond
     if (message.type === "ping") {
       send('pong', 'pong');
 
     } else {
 
     }
-    //ws.send('Hello from the server!');nix-shell -p fswebcam
   });
+  //function for sending messages
   function send(type, data) {
     ws.send(JSON.stringify({ type, data }));
   }
@@ -66,13 +73,16 @@ wss.on('connection', (ws) => {
 
 //host the server(just dont touch it)
 const server = http.createServer((req, res) => {
+  //if they are accesing the stream
   if (req.url === '/stream') {
+    //we have a function for this
     streamVideo(res, req, true);
   } else {
-    //send the file
+    //otherwize
+    //find the file
     const filePath = path.join(__dirname, 'src', req.url);
-
     fs.access(filePath, (err) => {
+      //if the file exists then send it
       if (err) {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/plain');
@@ -93,7 +103,7 @@ const server = http.createServer((req, res) => {
     });
   }
 });
-
+//start ruinning the server
 server.listen(filePort, ip, () => {
   console.log(`Server running at http://${ip}:${filePort}/`);
 });
@@ -114,8 +124,9 @@ const getContentType = (filePath) => {
       return 'application/octet-stream';
   }
 };
-
+//function for streaming vidoe
 function streamVideo(res, req) {
+  //headers, idk how it works
   res.writeHead(200, {
     'Content-Type': 'multipart/x-mixed-replace; boundary=frame',
     'Cache-Control': 'no-cache',
@@ -138,8 +149,10 @@ function streamVideo(res, req) {
     '-'
   ];
 
+  //create an ffmpeg process to get the webcam feed
   const ffmpeg = spawn('ffmpeg', inputFormat);
 
+  //every time ffmpeg sends a frame, send it to the client
   ffmpeg.stdout.on('data', (data) => {
     if (!res.writableEnded) {
       res.write('--frame\r\n');
@@ -150,7 +163,7 @@ function streamVideo(res, req) {
     }
   });
   
-
+  //handle closing/crashing
   req.on('close', () => {
     ffmpeg.kill('SIGKILL');
   });
