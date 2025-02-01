@@ -15,6 +15,8 @@ const ip = "127.0.0.1"
 const filePort = 3000;
 //port for the websocket server
 const webSocketPort = 8080;
+//port for the websocket server
+const streamPort = 8081;
 
 
 
@@ -52,7 +54,44 @@ wss.on('connection', (ws) => {
 //ws.send(temp);
 
 
+//stream
+const stream = new WebSocket.Server({ path: '/stream', port: streamPort });
+stream.on('connection', ws => {
+  console.log('Client connected');
 
+  const ffmpeg = spawn("ffmpeg", [
+    "-f", "v4l2",
+    "-input_format", "mjpeg",
+    "-framerate", "30",
+    "-video_size", "640x480",
+    "-i", "/dev/video0",
+    "-f", "mjpeg",
+    "-fflags", "nobuffer",
+    "-tune", "zerolatency",
+    //"-q:v", "10",
+    "pipe:1",
+
+]);
+
+
+  ffmpeg.stdout.on('data', data => {
+    ws.send(data);
+  });
+
+  ffmpeg.stderr.on('data', data => {
+    console.error(`FFmpeg stderr: ${data}`);
+  });
+
+  ffmpeg.on('close', code => {
+    console.log(`FFmpeg process exited with code ${code}`);
+    ws.close();
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+    ffmpeg.kill();
+  });
+});
 
 
 
@@ -74,10 +113,6 @@ wss.on('connection', (ws) => {
 //host the server(just dont touch it)
 const server = http.createServer((req, res) => {
   //if they are accesing the stream
-  if (req.url === '/stream') {
-    //we have a function for this
-    streamVideo(res, req, true);
-  } else {
     //otherwize
     //find the file
     const filePath = path.join(__dirname, 'src', req.url);
@@ -101,7 +136,6 @@ const server = http.createServer((req, res) => {
         });
       }
     });
-  }
 });
 //start ruinning the server
 server.listen(filePort, ip, () => {
@@ -124,51 +158,3 @@ const getContentType = (filePath) => {
       return 'application/octet-stream';
   }
 };
-//function for streaming vidoe
-function streamVideo(res, req) {
-  //headers, idk how it works
-  res.writeHead(200, {
-    'Content-Type': 'multipart/x-mixed-replace; boundary=frame',
-    'Cache-Control': 'no-cache',
-    'Connection': 'close',
-    'Pragma': 'no-cache'
-  });
-
-  const inputFormat = [
-    '-f', 'v4l2',
-    '-input_format', 'mjpeg',
-    '-fflags', 'nobuffer',
-    '-flags', 'low_delay',
-    '-strict', 'experimental',
-    '-i', '/dev/video0',
-    '-r', '30',
-    '-q:v', '3',
-    '-video_size', '4x3',
-    '-f', 'image2pipe',
-    '-vcodec', 'mjpeg',
-    '-'
-  ];
-
-  //create an ffmpeg process to get the webcam feed
-  const ffmpeg = spawn('ffmpeg', inputFormat);
-
-  //every time ffmpeg sends a frame, send it to the client
-  ffmpeg.stdout.on('data', (data) => {
-    if (!res.writableEnded) {
-      res.write('--frame\r\n');
-      res.write('Content-Type: image/jpeg\r\n');
-      res.write(`Content-Length: ${data.length}\r\n\r\n`);
-      res.write(data);
-      res.write('\r\n');
-    }
-  });
-  
-  //handle closing/crashing
-  req.on('close', () => {
-    ffmpeg.kill('SIGKILL');
-  });
-
-  ffmpeg.stderr.on('data', (data) => {
-    console.error(`FFmpeg stderr: ${data}`);
-  });
-}

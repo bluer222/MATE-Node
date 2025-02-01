@@ -75,3 +75,4 @@ function log(text) {
     const br = document.createElement('br');
     cons.prepend(text, br);
 }
+
