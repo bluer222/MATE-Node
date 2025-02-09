@@ -10,7 +10,7 @@ const { spawn } = require('child_process');
 
 
 //config
-const ip = "127.0.0.1"
+const ip = "0.0.0.0"
 //port for video stream and for the file server
 const filePort = 3000;
 //port for the websocket server
