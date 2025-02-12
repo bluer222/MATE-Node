@@ -4,7 +4,7 @@ Program in Node js to control MATE Robot through an ethernet cable for the Atlan
  * Website is hosted by robot
  * Surface computer accesses website through ethernet
  * Website uses gamepad API + websockets, to send inputs down to the robot
- * Robot uses mjpeg stream to send up video
+ * Robot streams ffmpeg webcam output to surface through websockets
 <br>
 <h3>Usage:</h3>
 <ul>
