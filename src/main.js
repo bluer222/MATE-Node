@@ -3,6 +3,8 @@ let socket;
 let pingTime = 0;
 //messages that we tried to send but werent connected
 let sendBuffer = [];
+
+
 //open connection to server
 openSocket();
 function openSocket() {
@@ -41,19 +43,62 @@ function ping() {
     pingTime = performance.now();
     send("ping", "ping");
 }
+//detect controllers
+let gamepadIndex = 0;
+window.addEventListener("gamepadconnected", (event) => {
+    //store the index and get init values
+    gamepadIndex = event.gamepad.index;
+    let controller = navigator.getGamepads()[gamepadIndex];
+    let naxes = controller.axes;
+    let nbuttons = controller.buttons;
+    axes = naxes;
+    buttons = nbuttons;
+    //start the update loop
+    updateController();
+});
+//most recent controlelr data
+let axes = [];
+let buttons = [];
 
-//connect a controller
-let controller = navigator.getGamepads()[0];
-//send button presses
-window.addEventListener('gamepadbuttondown', (event) => {
-    log('Button pressed:', event.detail.button);
-    send("button", event.detail.button);
-});
+function updateController() {
+    //get up-to-date controller data
+    let controller = navigator.getGamepads()[gamepadIndex];
+    let naxes = controller.axes;
+    let nbuttons = controller.buttons;
+    let changedAxes = [];
+    let changedButtons = [];
+    //find changes and send them
+    naxes.forEach((naxis, index) => {
+        if (naxis != axes[index]) {
+            changedAxes.push({ index, value: naxis });
+        }
+    });
+    if (changedAxes.length > 0) {
+        gamepadAxisMove(changedAxes);
+        axes = naxes;
+    }
+    nbuttons.forEach((nbutton, index) => {
+        if (nbutton.pressed != buttons[index].pressed) {
+            changedButtons.push({ index, value: nbutton.pressed });
+        }
+    });
+    if (changedButtons.length > 0) {
+        gamepadButtonDown(changedButtons);
+        buttons = nbuttons;
+    }
+    //loop
+    requestAnimationFrame(updateController);
+}
+
 //send stick movements
-window.addEventListener('gamepadaxismove', (event) => {
-    log('Axis moved:', event.detail.axis, event.detail.value);
-    send("axis", { axis: event.detail.axis, value: event.detail.value });
-});
+function gamepadAxisMove(axes) {
+    console.log('Axis moved:', axes);
+};
+//send button presses
+function gamepadButtonDown(changedButtons) {
+    console.log('Button pressed:', changedButtons);
+    document.getElementById("controllerInfo").innerHTML = changedButtons;
+};
 
 //send a message to the server
 function send(type, data) {
