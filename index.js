@@ -8,6 +8,7 @@ const WebSocket = require('ws');
 //webcam stuff
 const { spawn } = require('child_process');
 
+const controller = require('./controller.js');
 
 //config
 const ip = "0.0.0.0"
@@ -32,11 +33,12 @@ wss.on('connection', (ws) => {
     //log
     console.log('Received message:', message.type);
 
-    //respond
-    if (message.type === "ping") {
+    if(message.type === "buttonUpdate"){
+      controller.buttonUpdate(message.data);
+    }else if(message.type === "axisUpdate"){
+      controller.axisUpdate(message.data);
+    }else if (message.type === "ping") {
       send('pong', 'pong');
-
-    } else {
 
     }
   });
@@ -55,10 +57,11 @@ wss.on('connection', (ws) => {
 
 
 //stream
+
 const stream = new WebSocket.Server({ path: '/stream', port: streamPort });
 stream.on('connection', ws => {
   console.log('Client connected');
-
+/*
   const ffmpeg = spawn("ffmpeg", [
     "-f", "v4l2",
     "-input_format", "mjpeg",
@@ -91,6 +94,7 @@ stream.on('connection', ws => {
     console.log('Client disconnected');
     ffmpeg.kill();
   });
+  */
 });
 
 
