@@ -9,6 +9,8 @@ const WebSocket = require('ws');
 const { spawn } = require('child_process');
 
 const controller = require('./controller.js');
+const motorsJs = require('./motors.js');
+
 
 //config
 const ip = "0.0.0.0"
@@ -20,56 +22,59 @@ const webSocketPort = 8080;
 const streamPort = 8081;
 
 //clamp function
-function clamp(val, min, max){ return Math.min(Math.max(val, min), max);}
+function clamp(val, min, max) { return Math.min(Math.max(val, min), max); }
 
 
 //how much do we want to move in each direction 
-let movement ={
+let movement = {
   //positive is up, negitive is down
   upDown: 0,
-    //negitive is left, positive is right
-    side: 0,
-    //negitive is left, positive is right
+  //negitive is left, positive is right
+  side: 0,
+  //negitive is left, positive is right
   turn: 0,
-    //positive is forward, negitive is backward
+  //positive is forward, negitive is backward
 
   forwardBackward: 0,
 };
-controller.buttonMapping.addListener((e)=>{
+//how much do we want to move each motor(from -1 to 1)
+//positive is forward, negitive is backward
+let motors = [0, 0, 0, 0, 0, 0];
+controller.buttonMapping.addListener((e) => {
 
 });
 
-controller.axesMapping.addListener((e)=>{
+controller.axesMapping.addListener((e) => {
   console.log(e);
   //x1
-  if(e.id === 0){
+  if (e.id === 0) {
     movement.turn = e.value;
   }
   ///y1
-  if(e.id === 1){
+  if (e.id === 1) {
     movement.upDown = -e.value;
   }
   //x2
-  if(e.id === 2){
+  if (e.id === 2) {
     movement.side = e.value;
   }
   //y2
-  if(e.id === 3){
+  if (e.id === 3) {
     movement.forwardBackward = -e.value;
   }
-calculateMotorImpulses(movement);
+  calculateMotorImpulses(movement);
 });
 
-function calculateMotorImpulses(movement){
+function calculateMotorImpulses(movement) {
   //use your brain and motormap.png
-  let motor1 = clamp(movement.forwardBackward - movement.turn + movement.side, -1, 1);
-  let motor2 = clamp(movement.forwardBackward + movement.turn - movement.side, -1, 1);
-  let motor3 = clamp(-movement.forwardBackward + movement.turn + movement.side, -1, 1);
-  let motor4 = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
-  let motor5 = clamp(movement.upDown, -1, 1);
-  let motor6 = clamp(movement.upDown, -1, 1);
-
-  console.log(motor1 +", "+ motor2+", "+ motor3+", "+ motor4+", "+ motor5+", "+ motor6);
+  motors[1] = clamp(movement.forwardBackward - movement.turn + movement.side, -1, 1);
+  motors[2] = clamp(movement.forwardBackward + movement.turn - movement.side, -1, 1);
+  motors[3] = clamp(-movement.forwardBackward + movement.turn + movement.side, -1, 1);
+  motors[4] = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
+  motors[5] = clamp(movement.upDown, -1, 1);
+  motors[6] = clamp(movement.upDown, -1, 1);
+  motorsJs.setMotorImpulses(motors);
+  console.log(motors);
 }
 
 //websockets
