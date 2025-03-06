@@ -1,7 +1,7 @@
 //start streaming video
 openStream();
 function openStream() {
-    let stream = new WebSocket('ws://127.0.0.1:8081/stream');
+    let stream = new WebSocket('ws://'+hostname+':streamPort/stream');
     //we recived a message
     stream.binaryType = "arraybuffer";
 

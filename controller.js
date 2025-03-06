@@ -14,7 +14,6 @@ addMapping(id, mapping) {
 }
 
 setI(id, value) {
-    console.log(id);
     this.value[id] = value;
     this.notifyListeners(id, value, "set"); // Tell everyone about the change
 }

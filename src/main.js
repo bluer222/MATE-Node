@@ -1,24 +1,13 @@
 //connection
 let socket;
 let pingTime = 0;
-//messages that we tried to send but werent connected
-let sendBuffer = [];
-
-
+let hostname = document.location.hostname;
 //open connection to server
 openSocket();
 function openSocket() {
-    socket = new WebSocket('ws://127.0.0.1:8080');
-
+    socket = new WebSocket('ws://' + hostname + ':webSocketPort');
     //when we finish connecting
     socket.onopen = () => {
-        //send any buffered messages
-        if (sendBuffer.length > 0) {
-            sendBuffer.forEach((message) => {
-                socket.send(message);
-            });
-            sendBuffer = [];
-        }
         log('Connected to server');
     };
 
@@ -34,7 +23,10 @@ function openSocket() {
 
     //the socked got disconnected(this is bad)
     socket.onclose = () => {
-        log("Disconnected from server(bad)");
+        log('Disconnected from controller stream(very bad)');
+        setTimeout(()=>{
+            openSocket();
+        }, 300)
     };
 }
 
@@ -47,12 +39,8 @@ function ping() {
 
 //send a message to the server
 function send(type, data) {
-    //oh no it closed
-    if (socket.readyState === WebSocket.CLOSED) {
-        //quick, buffer it and reconect before anyone notices
-        sendBuffer.push(JSON.stringify({ type, data }));
-        openSocket();
-    } else {
+    //if the socket is open
+    if (socket.readyState === WebSocket.OPEN) {
         //send it
         socket.send(JSON.stringify({ type, data }));
     }
