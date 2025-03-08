@@ -73,7 +73,8 @@ function calculateMotorImpulses(movement) {
   motors[4] = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
   motors[5] = clamp(movement.upDown, -1, 1);
   motors[6] = clamp(movement.upDown, -1, 1);
-  motorsJs.setMotorImpulses(motors);
+  //send to motors 
+  motorsJs.setMotorImpulses(motors, motorsJs.pwm);
   console.log(motors);
 }
 
