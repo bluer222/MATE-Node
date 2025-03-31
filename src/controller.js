@@ -20,7 +20,7 @@ class mapping {
     }
 
     setI(id, value) {
-        console.log(id);
+        console.log(value);
         this.value[id] = value;
         this.notifyListeners(id, value, "set"); // Tell everyone about the change
     }
@@ -190,8 +190,8 @@ function updateController() {
         }
     });
     nbuttons.forEach((nbutton, index) => {
-        if (nbutton.pressed != buttonMapping.getI(index)) {
-            buttonMapping.setI(index, nbutton.pressed);
+        if (nbutton.value != buttonMapping.getI(index)) {
+            buttonMapping.setI(index, nbutton.value);
         }
     });
 

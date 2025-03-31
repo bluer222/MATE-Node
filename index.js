@@ -37,11 +37,19 @@ let movement = {
 
   forwardBackward: 0,
 };
+//how much do we want to move in each direction 
+let servos = [
+ 0
+];
 //how much do we want to move each motor(from -1 to 1)
 //positive is forward, negitive is backward
 let motors = [0, 0, 0, 0, 0, 0];
 controller.buttonMapping.addListener((e) => {
-
+ //x1
+  if (e.id === 6) {
+    servos[0] = 0.008 + (0.135 - 0.008)*e.value;
+  }
+   motorsJs.setServoImpulses(servos, motorsJs.pwm);
 });
 
 controller.axesMapping.addListener((e) => {
@@ -73,7 +81,7 @@ function calculateMotorImpulses(movement) {
   motors[4] = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
   motors[5] = clamp(movement.upDown, -1, 1);
   motors[6] = clamp(movement.upDown, -1, 1);
-  motorsJs.setMotorImpulses(motors);
+  //motorsJs.setMotorImpulses(motors, motorsJs.pwm);
   console.log(motors);
 }
 
