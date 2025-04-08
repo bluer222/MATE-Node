@@ -20,7 +20,7 @@ body {
 body {
     margin:0;
 }
-#stream{
+.stream{
     float: right;
     width: calc(67% - 60px);
     height: auto;

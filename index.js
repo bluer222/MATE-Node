@@ -6,10 +6,11 @@ const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
 //webcam stuff
-const { spawn } = require('child_process');
 
 const controller = require('./controller.js');
 const motorsJs = require('./motors.js');
+const videoStream = require('./video.js');
+
 
 
 //config
@@ -20,7 +21,6 @@ const filePort = 3000;
 const webSocketPort = 8080;
 //port for the video stream
 const streamPort = 8081;
-
 //clamp function
 function clamp(val, min, max) { return Math.min(Math.max(val, min), max); }
 
@@ -39,17 +39,17 @@ let movement = {
 };
 //how much do we want to move in each direction 
 let servos = [
- 0
+  0
 ];
 //how much do we want to move each motor(from -1 to 1)
 //positive is forward, negitive is backward
 let motors = [0, 0, 0, 0, 0, 0];
 controller.buttonMapping.addListener((e) => {
- //x1
+  //x1
   if (e.id === 6) {
-    servos[0] = 0.008 + (0.135 - 0.008)*e.value;
+    servos[0] = 0.008 + (0.135 - 0.008) * e.value;
   }
-   motorsJs.setServoImpulses(servos, motorsJs.pwm);
+  motorsJs.setServoImpulses(servos, motorsJs.pwm);
 });
 
 controller.axesMapping.addListener((e) => {
@@ -121,52 +121,14 @@ wss.on('connection', (ws) => {
 
 //stream
 
-const stream = new WebSocket.Server({ path: '/stream', port: streamPort });
-stream.on('connection', ws => {
-  console.log('Client connected');
-  /*
-    const ffmpeg = spawn("ffmpeg", [
-      "-f", "v4l2",
-      "-input_format", "mjpeg",
-      "-framerate", "30",
-      "-video_size", "640x480",
-      "-i", "/dev/video0",
-      "-f", "mjpeg",
-      "-fflags", "nobuffer",
-      "-tune", "zerolatency",
-      //"-q:v", "10",
-      "pipe:1",
+
+
+videoStream.detectVideoInputs().then((cameras)=>{
+
+  console.log(cameras);
+  videoStream.startStreams(cameras, streamPort);
   
-  ]);
-  
-  
-    ffmpeg.stdout.on('data', data => {
-      ws.send(data);
-    });
-  
-    ffmpeg.stderr.on('data', data => {
-      console.error(`FFmpeg stderr: ${data}`);
-    });
-  
-    ffmpeg.on('close', code => {
-      console.log(`FFmpeg process exited with code ${code}`);
-      ws.close();
-    });
-  
-    ws.on('close', () => {
-      console.log('Client disconnected');
-      ffmpeg.kill();
-    });
-    */
 });
-
-
-
-
-
-
-
-
 
 
 
