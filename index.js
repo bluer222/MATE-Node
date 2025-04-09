@@ -8,7 +8,7 @@ const WebSocket = require('ws');
 //webcam stuff
 
 const controller = require('./controller.js');
-const motorsJs = require('./motors.js');
+//const motorsJs = require('./motors.js');
 const videoStream = require('./video.js');
 
 
@@ -128,16 +128,6 @@ videoStream.detectVideoInputs().then((cameras)=>{
   console.log(cameras);
   videoStream.startStreams(cameras, streamPort);
   
-});
-
-
-
-
-
-
-
-
-
 
 //host the server(just dont touch it)
 const server = http.createServer((req, res) => {
@@ -158,7 +148,7 @@ const server = http.createServer((req, res) => {
         } else {
           res.statusCode = 200;
           res.setHeader('Content-Type', getContentType(filePath));
-          let newdata = data.toString().replace('webSocketPort', webSocketPort).replace('streamPort', streamPort);
+          let newdata = data.toString().replace('webSocketPort', webSocketPort).replace('streamPort', streamPort).replace('numberOfStreams', cameras.length);
           res.end(newdata);
         }
       });
@@ -186,3 +176,12 @@ const getContentType = (filePath) => {
       return 'application/octet-stream';
   }
 };
+});
+
+
+
+
+
+
+
+

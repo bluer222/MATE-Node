@@ -1,34 +1,26 @@
-const streams = 2;
+const streams = numberOfStreams;
 for (let index = 0; index < streams; index++) {
-  let newStream = document.createElement("img");
+  let newStream = document.createElement("canvas");
   newStream.className = "stream";
   document.body.appendChild(newStream);
   openStream(index, newStream);
 }
-function openStream(number, element) {
+function openStream(number, canvas) {
+  const ctx = canvas.getContext('2d');
+    const img = new Image();
   console.log(number);
-    let stream = new WebSocket('ws://'+hostname+':' +(Number('streamPort') +number) + '/stream');
-    //we recived a message
-    stream.binaryType = "arraybuffer";
-  
-    stream.onmessage = (event) => {
-      const arrayBuffer = event.data;
-      const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });  // Create a Blob with the JPEG data
-      const imageURL = URL.createObjectURL(blob);  // Create a URL for the image Blob
+    let socket = new WebSocket('ws://'+hostname+':' +(Number('streamPort') +number) + '/stream');
+    socket.binaryType = 'arraybuffer';
 
-      element.src = imageURL;  // Data URL is sent directly from the backend
-
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
     };
 
-    stream.onopen = () => {
-        log('Connected to Video stream');
-      };
-      
-      stream.onclose = () => {
-        log('Disconnected from Video stream, attempting reconnect');
-        setTimeout(()=>{
-            openStream(number, element);
-        }, 300)
-      };
+    socket.onmessage = (event) => {
+      const blob = new Blob([event.data], { type: 'image/jpeg' });
+      img.src = URL.createObjectURL(blob);
+    };
 
 }

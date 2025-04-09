@@ -73,13 +73,26 @@ function startStreams(videoDevices, startingPort) {
         "pipe:1",                          // Output to stdout (piped output)
       ]);
 
+      let buffer = Buffer.alloc(0);
 
-      ffmpeg.stdout.on('data', data => {
-        
+      ffmpeg.stdout.on('data', chunk => {
+        buffer = Buffer.concat([buffer, chunk]);
 
-        // Send the Data URL over WebSocket
-        ws.send(data);
- 
+        // Look for JPEG SOI and EOI markers
+        while (true) {
+          const start = buffer.indexOf(Buffer.from([0xff, 0xd8])); // SOI
+          const end = buffer.indexOf(Buffer.from([0xff, 0xd9]), start + 1); // EOI
+          if (start !== -1 && end !== -1) {
+            const jpeg = buffer.slice(start, end + 2);
+            buffer = buffer.slice(end + 2);
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(jpeg);
+              }
+            
+          } else {
+            break;
+          }
+        }
       });
 
 
