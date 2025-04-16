@@ -8,7 +8,7 @@ const WebSocket = require('ws');
 //webcam stuff
 
 const controller = require('./controller.js');
-//const motorsJs = require('./motors.js');
+const motorsJs = require('./motors.js');
 const videoStream = require('./video.js');
 
 
@@ -75,12 +75,12 @@ controller.axesMapping.addListener((e) => {
 
 function calculateMotorImpulses(movement) {
   //use your brain and motormap.png
-  motors[1] = clamp(movement.forwardBackward - movement.turn + movement.side, -1, 1);
-  motors[2] = clamp(movement.forwardBackward + movement.turn - movement.side, -1, 1);
-  motors[3] = clamp(-movement.forwardBackward + movement.turn + movement.side, -1, 1);
-  motors[4] = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
+  motors[0] = clamp(movement.forwardBackward - movement.turn + movement.side, -1, 1);
+  motors[1] = clamp(movement.forwardBackward + movement.turn - movement.side, -1, 1);
+  motors[2] = clamp(-movement.forwardBackward + movement.turn + movement.side, -1, 1);
+  motors[3] = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
+  motors[4] = clamp(movement.upDown, -1, 1);
   motors[5] = clamp(movement.upDown, -1, 1);
-  motors[6] = clamp(movement.upDown, -1, 1);
   //send to motors 
   motorsJs.setMotorImpulses(motors, motorsJs.pwm);
   console.log(motors);

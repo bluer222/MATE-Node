@@ -10,29 +10,29 @@ var options = {
 pwm = new Pca9685Driver(options, function (err) {
 
 });
-function setMotorImpulses(movement, pwm) {
-        movement.forEach((power, motor) => {
-power = roundWithPersision(power, 10000)
-	console.log(motor, power);
-            // Set the duty cycle to 25% for channel 8
-            pwm.setDutyCycle(motor, power);
+function setMotorImpulses(motors, pwm) {
+    motors.forEach((power, motor) => {
+        power = roundWithPersision(power, 10000)
+        console.log(motor, power);
+        // Set the duty cycle to 25% for channel 8
+        pwm.setDutyCycle(motor, power);
 
-        });
-    }
-function setServoImpulses(movement, pwm) {
-        movement.forEach((power, motor) => {
-power = roundWithPersision(power, 10000)
-	console.log(motor, power);
-            // Set the duty cycle to 25% for channel 8
-            pwm.setDutyCycle(motor, power);
+    });
+}
+function setServoImpulses(servos, pwm) {
+    servos.forEach((power, servo) => {
+        power = roundWithPersision(power, 10000)
+        console.log(servo, power);
+        // Set the duty cycle to 25% for channel 8
+        pwm.setDutyCycle(servo+6, power);
 
-        });
-    }
-function roundWithPersision(num, precision){
-return Math.round(num*precision)/precision;
+    });
+}
+function roundWithPersision(num, precision) {
+    return Math.round(num * precision) / precision;
 }
 module.exports = {
-pwm,
+    pwm,
     setMotorImpulses,
-setServoImpulses
+    setServoImpulses
 }
