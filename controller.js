@@ -1,46 +1,50 @@
-    class mapping {
-        constructor() {
-            this.ids = {};
-            this.mappings = {};
-            this.value = {};
-            this.listeners = [];
+class mapping {
+    constructor() {
+        this.ids = {};
+        this.mappings = {};
+        this.value = {};
+        this.listeners = [];
+    }
+
+    addMapping(id, mapping) {
+        this.ids[mapping] = id;
+        this.mappings[id] = mapping;
+        this.value[id] = 0;
+        this.notifyListeners(id, 0, "add"); // Tell everyone about the change
+    }
+
+    setI(id, value) {
+        this.value[id] = value;
+        this.notifyListeners(id, value, "set"); // Tell everyone about the change
+    }
+
+    setM(mapping, value) {
+        this.setI(this.ids[mapping], value);
+        this.notifyListeners(this.ids[mapping], value, "set"); // Tell everyone about the change
+    }
+
+    getI(id) {
+        return this.value[id];
+    }
+
+    getM(mapping) {
+        return this.getI(this.ids[mapping]);
+    }
+
+    addListener(listener) {
+        this.listeners.push(listener);
+    }
+    resetValues() {
+        for (id in this.ids) {
+            this.setI(id, 0);
         }
+    }
 
-addMapping(id, mapping) {
-    this.ids[mapping] = id;
-    this.mappings[id] = mapping;
-    this.value[id] = 0;
-    this.notifyListeners(id, 0, "add"); // Tell everyone about the change
-}
-
-setI(id, value) {
-    this.value[id] = value;
-    this.notifyListeners(id, value, "set"); // Tell everyone about the change
-}
-
-setM(mapping, value) {
-    this.setI(this.ids[mapping], value);
-    this.notifyListeners(this.ids[mapping], value, "set"); // Tell everyone about the change
-}
-
-getI(id) {
-    return this.value[id];
-}
-
-getM(mapping) {
-    return this.getI(this.ids[mapping]);
-}
-
-addListener(listener) {
-    this.listeners.push(listener);
-}
-
-
-notifyListeners(id, value, action) {
-    this.listeners.forEach((listener) => {
-        listener({ id, button: this.mappings[id], value, action }); // Call each function with info about the change
-    });
-}
+    notifyListeners(id, value, action) {
+        this.listeners.forEach((listener) => {
+            listener({ id, button: this.mappings[id], value, action }); // Call each function with info about the change
+        });
+    }
 }
 const buttonMapping = new mapping();
 buttonMapping.addMapping(0, "x");

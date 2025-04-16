@@ -110,7 +110,8 @@ wss.on('connection', (ws) => {
     ws.send(JSON.stringify({ type, data }));
   }
   ws.on('close', () => {
-    console.log('Client disconnected');
+    console.log('Client disconnected, stopping motors');
+    controller.resetValues();
   });
 });
 
