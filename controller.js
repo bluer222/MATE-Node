@@ -177,5 +177,6 @@ module.exports = {
     axisUpdate,
     buttonMapping,
     axesMapping,
-    controller
+    controller,
+    resetValues
 };
