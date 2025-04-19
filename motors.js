@@ -12,12 +12,13 @@ pwm = new Pca9685Driver(options, function (err) {
 });
 function setMotorImpulses(motors, pwm) {
     motors.forEach((power, motor) => {
-        power = roundWithPersision(power, 10000)
-        console.log(motor, power);
         // Set the duty cycle to 25% for channel 8
-        pwm.setDutyCycle(motor, power);
+        pwm.setPulseLength(motor, inputToPulse(power));
 
     });
+}
+function inputToPulse(input) {
+    return Math.round(1500 + (400 * input));
 }
 function setServoImpulses(servos, pwm) {
     servos.forEach((power, servo) => {

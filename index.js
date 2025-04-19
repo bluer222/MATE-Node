@@ -81,10 +81,6 @@ function calculateMotorImpulses(movement) {
   motors[3] = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
   motors[4] = clamp(movement.upDown, -1, 1);
   motors[5] = clamp(movement.upDown, -1, 1);
-  //turn it into 0-1
-  for (let i = 0; i < motors.length; i++) {
-    motors[i] = (motors[i] * 0.5) + 0.5;
-  }
   //send to motors 
   motorsJs.setMotorImpulses(motors, motorsJs.pwm);
   console.log(motors);
