@@ -56,31 +56,31 @@ controller.axesMapping.addListener((e) => {
   console.log(e);
   //x1
   if (e.id === 0) {
-    movement.turn = e.value;
+    movement.turn = 0.5+(e.value/2);
   }
   ///y1
   if (e.id === 1) {
-    movement.upDown = -e.value;
+    movement.upDown = 0.5-(e.value/2);
   }
   //x2
   if (e.id === 2) {
-    movement.side = e.value;
+    movement.side = 0.5+(e.value/2);
   }
   //y2
   if (e.id === 3) {
-    movement.forwardBackward = -e.value;
+    movement.forwardBackward = 0.5-(e.value/2);
   }
   calculateMotorImpulses(movement);
 });
 
 function calculateMotorImpulses(movement) {
   //use your brain and motormap.png
-  motors[0] = clamp(movement.forwardBackward - movement.turn + movement.side, -1, 1);
-  motors[1] = clamp(movement.forwardBackward + movement.turn - movement.side, -1, 1);
-  motors[2] = clamp(-movement.forwardBackward + movement.turn + movement.side, -1, 1);
-  motors[3] = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
-  motors[4] = clamp(movement.upDown, -1, 1);
-  motors[5] = clamp(movement.upDown, -1, 1);
+  motors[0] = clamp(movement.forwardBackward - movement.turn + movement.side, 0, 1);
+  motors[1] = clamp(movement.forwardBackward + movement.turn - movement.side, 0, 1);
+  motors[2] = clamp(-movement.forwardBackward + movement.turn + movement.side, 0, 1);
+  motors[3] = clamp(-movement.forwardBackward - movement.turn - movement.side, 0, 1);
+  motors[4] = clamp(movement.upDown, 0, 1);
+  motors[5] = clamp(movement.upDown, 0, 1);
   //send to motors 
   motorsJs.setMotorImpulses(motors, motorsJs.pwm);
   console.log(motors);
