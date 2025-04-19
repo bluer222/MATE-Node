@@ -18,7 +18,7 @@ function setMotorImpulses(motors, pwm) {
     });
 }
 function inputToPulse(input) {
-    return Math.round(1500 + (400 * input));
+    return Math.round(1600 + (400 * input));
 }
 function setServoImpulses(servos, pwm) {
     servos.forEach((power, servo) => {
