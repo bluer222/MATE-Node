@@ -20,9 +20,14 @@ class mapping {
     }
 
     setI(id, value) {
-        console.log(value);
-        this.value[id] = value;
-        this.notifyListeners(id, value, "set"); // Tell everyone about the change
+        if (value + 0.02 > this.value[id] && value - 0.02 < this.value[id]) {
+            //its already close enough
+        } else {
+
+            console.log(value);
+            this.value[id] = value;
+            this.notifyListeners(id, value, "set"); // Tell everyone about the change
+        }
     }
 
     setM(mapping, value) {
@@ -210,12 +215,12 @@ function displayController() {
             ctx.beginPath();
             ctx.arc(controller[button].x, controller[button].y, controller[button].radius, 0, 2 * Math.PI);
             ctx.moveTo(controller[button].x, controller[button].y);
-            if(button =="a1"){
+            if (button == "a1") {
                 ctx.lineTo(controller[button].x + axesMapping.getM("x") * 30, controller[button].y + axesMapping.getM("y") * 30);
-            }else{
+            } else {
                 ctx.lineTo(controller[button].x + axesMapping.getM("x2") * 30, controller[button].y + axesMapping.getM("y2") * 30);
             }
-            
+
             ctx.stroke();
         } else {
             if (buttonMapping.getM(button)) {
@@ -227,8 +232,8 @@ function displayController() {
     }
 }
 buttonMapping.addListener((event) => {
-console.log("buttonUpdate " + event.id);
-send("buttonUpdate", event);
+    console.log("buttonUpdate " + event.id);
+    send("buttonUpdate", event);
 });
 
 axesMapping.addListener((event) => {
@@ -240,10 +245,10 @@ axesMapping.addListener((event) => {
 function stickCentering(number) {
     // Check if the number is between -0.02 and 0.02
     if (number > -0.04 && number < 0.04) {
-      // If it is, return 0
-      return 0;
+        // If it is, return 0
+        return 0;
     } else {
-      // If it's not, return the original number
-      return number;
+        // If it's not, return the original number
+        return number;
     }
-  }
+}
