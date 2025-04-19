@@ -111,7 +111,7 @@ wss.on('connection', (ws) => {
   }
   ws.on('close', () => {
     console.log('Client disconnected, stopping motors');
-    controller.resetValues();
+    controller.axesMapping.resetValues();
   });
 });
 
