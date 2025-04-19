@@ -239,7 +239,7 @@ axesMapping.addListener((event) => {
 
 function stickCentering(number) {
     // Check if the number is between -0.02 and 0.02
-    if (number > -0.02 && number < 0.02) {
+    if (number > -0.04 && number < 0.04) {
       // If it is, return 0
       return 0;
     } else {
