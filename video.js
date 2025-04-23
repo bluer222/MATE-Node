@@ -1,7 +1,3 @@
-
-//multiple video streamse
-const streams = ["", ""];
-
 const { spawn, exec } = require('child_process');
 const WebSocket = require('ws');
 
@@ -11,12 +7,10 @@ function detectVideoInputs() {
   return new Promise((resolve, reject) => {
     exec('v4l2-ctl --list-devices', (error, stdout, stderr) => {
       if (error) {
-        reject(`exec error: ${error}`);
-        return;
+        resolve([]);
       }
       if (stderr) {
-        reject(`stderr: ${stderr}`);
-        return;
+        resolve([]);
       }
 
       // Parse the output to find and filter only USB video devices
@@ -67,8 +61,8 @@ function startStreams(videoDevices, startingPort) {
         "-f", "mjpeg",                     // Output format set to MJPEG (to match input format)
         "-fflags", "nobuffer",             // Reduce latency
         "-max_delay", "0",  // Remove any maximum delay (force the lowest possible latency)
-"-analyzeduration", "0",        // Set analysis duration to zero (no analysis delay)
-"-probesize", "32",             // Set probe size to a very small value 
+        "-analyzeduration", "0",        // Set analysis duration to zero (no analysis delay)
+        "-probesize", "32",             // Set probe size to a very small value 
         "-tune", "zerolatency",            // Tune for low-latency streaming
         "pipe:1",                          // Output to stdout (piped output)
       ]);
@@ -85,10 +79,10 @@ function startStreams(videoDevices, startingPort) {
           if (start !== -1 && end !== -1) {
             const jpeg = buffer.slice(start, end + 2);
             buffer = buffer.slice(end + 2);
-              if (ws.readyState === WebSocket.OPEN) {
-                ws.send(jpeg);
-              }
-            
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(jpeg);
+            }
+
           } else {
             break;
           }

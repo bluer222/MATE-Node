@@ -39,10 +39,14 @@ function ping() {
 
 //send a message to the server
 function send(type, data) {
+    try{
     //if the socket is open
     if (socket.readyState === WebSocket.OPEN) {
         //send it
         socket.send(JSON.stringify({ type, data }));
+    }
+    }catch(e){
+        log("Error sending message: " + e);
     }
 }
 

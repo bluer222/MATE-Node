@@ -46,7 +46,11 @@ class mapping {
     addListener(listener) {
         this.listeners.push(listener);
     }
-
+    resetValues() {
+        for (let id in this.ids) {
+            this.setI(id, 0);
+        }
+    }
 
     notifyListeners(id, value, action) {
         this.listeners.forEach((listener) => {
