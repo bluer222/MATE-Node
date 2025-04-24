@@ -13,7 +13,7 @@ pwm = new Pca9685Driver(options, function (err) {
 function setMotorImpulses(motors, pwm) {
     motors.forEach((power, motor) => {
         // Set the duty cycle to 25% for channel 8
-        pwm.setPulseLength(motor, inputToPulse(power));
+        pwm.setPulseLength(motor,  (power));
 
     });
 }

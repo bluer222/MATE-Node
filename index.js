@@ -75,19 +75,17 @@ controller.axesMapping.addListener((e) => {
 
 function calculateMotorImpulses(movement) {
   //use your brain and motormap.png
-  motors[0] = clamp(movement.forwardBackward - movement.turn + movement.side, -1, 1);
-  motors[1] = clamp(movement.forwardBackward + movement.turn - movement.side, -1, 1);
+  motors[0] = -clamp(movement.forwardBackward - movement.turn + movement.side, -1, 1);
+  motors[1] = -clamp(movement.forwardBackward + movement.turn - movement.side, -1, 1);
   motors[2] = clamp(-movement.forwardBackward + movement.turn + movement.side, -1, 1);
-  motors[3] = clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
-  motors[4] = clamp(movement.upDown, -1, 1);
-  motors[5] = clamp(movement.upDown, -1, 1);
+  motors[3] = -clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
+  motors[4] = -clamp(movement.upDown, -1, 1);
+  motors[5] = -clamp(movement.upDown, -1, 1);
   //send to motors 
   motorsJs.setMotorImpulses(motors, motorsJs.pwm);
   console.log(motors);
 }
 
-//websockets
-const wss = new WebSocket.Server({ port: webSocketPort });
 wss.on('connection', (ws) => {
   console.log('Client connected');
 
