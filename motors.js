@@ -25,7 +25,7 @@ function setServoImpulses(servos, pwm) {
         power = roundWithPersision(power, 10000)
         console.log(servo, power);
         // Set the duty cycle to 25% for channel 8
-        pwm.setDutyCycle(servo+13, power);
+        pwm.setDutyCycle(servo+14, power);
 
     });
 }
