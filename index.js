@@ -86,6 +86,8 @@ function calculateMotorImpulses(movement) {
   console.log(motors);
 }
 
+//websockets
+const wss = new WebSocket.Server({ port: webSocketPort });
 wss.on('connection', (ws) => {
   console.log('Client connected');
 
