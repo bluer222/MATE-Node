@@ -82,8 +82,9 @@ function calculateMotorImpulses(movement) {
   motors[4] = -clamp(movement.upDown, -1, 1);
   motors[5] = -clamp(movement.upDown, -1, 1);
   //send to motors 
-  motorsJs.setMotorImpulses(motors, motorsJs.pwm);
   console.log(motors);
+
+  motorsJs.setMotorImpulses(motors, motorsJs.pwm);
 }
 
 //websockets
