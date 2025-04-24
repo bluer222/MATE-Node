@@ -39,7 +39,7 @@ let movement = {
 };
 //how much do we want to move in each direction 
 let servos = [
-  0
+  0, 0
 ];
 //how much do we want to move each motor(from -1 to 1)
 //positive is forward, negitive is backward
@@ -48,6 +48,9 @@ controller.buttonMapping.addListener((e) => {
   //x1
   if (e.id === 6) {
     servos[0] = 0.008 + (0.135 - 0.008) * e.value;
+  }
+  if (e.id === 7) {
+    servos[1] = 0.008 + (0.135 - 0.008) * e.value;
   }
   motorsJs.setServoImpulses(servos, motorsJs.pwm);
 });
