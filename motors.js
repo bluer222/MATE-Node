@@ -15,19 +15,30 @@ var options = {
 pwm = new Pca9685Driver(options, function (err) {
 
 });
+function convertToPWM(motors) {
+    motors.forEach((power) => {
+        power = inputToPulse(power);
+    });
+}
 function scaleMotorPower(motors) {
+    motors = motors.map(power => {
+        if (power > 1500) {
+            return Math.max(1500, power - 4);
+        } else if (power < 1500) {
+            return Math.min(1500, power + 4);
+        } else {
+            return power;
+        }
+    });
     var totalPower = 0;
     motors.forEach((power, motor) => {
-        power = inputToPulse(power);
         totalPower += getPowerUsage(power);
     });
-    var scale = 25/totalPower;
-    if(scale > 1) {
-        scale = 1;
+    if(totalPower > 25){
+        return scaleMotorPower(motors);
+    }else{
+        return motors;
     }
-    motors.forEach((power, motor) => {
-        power = Math.round(power*scale);
-    });
 }
 function setMotorImpulses(motors, pwm) {
     motors.forEach((power, motor) => {
@@ -55,5 +66,7 @@ module.exports = {
     pwm,
     setMotorImpulses,
     setServoImpulses,
-    getPowerUsage
+    getPowerUsage,
+    convertToPWM,
+    scaleMotorPower
 }
