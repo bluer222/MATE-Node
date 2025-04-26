@@ -34,7 +34,7 @@ function scaleMotorPower(motors) {
     motors.forEach((power, motor) => {
         totalPower += getPowerUsage(power);
     });
-    if(totalPower > 25){
+    if(totalPower > 20){
         return scaleMotorPower(motors);
     }else{
         return motors;
