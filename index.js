@@ -56,7 +56,7 @@ controller.buttonMapping.addListener((e) => {
 });
 
 controller.axesMapping.addListener((e) => {
-  console.log(e);
+  //console.log(e);
   //x1
   if (e.id === 0) {
     movement.turn = e.value;
@@ -85,7 +85,7 @@ function calculateMotorImpulses(movement) {
   motors[4] = -clamp(movement.upDown, -1, 1);
   motors[5] = -clamp(movement.upDown, -1, 1);
   //send to motors 
-  console.log(motors);
+  //console.log(motors);
   motors = motorsJs.convertToPWM(motors);
  motors = motorsJs.scaleMotorPower(motors);
   motorsJs.setMotorImpulses(motors, motorsJs.pwm);
