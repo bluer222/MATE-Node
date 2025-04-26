@@ -86,8 +86,8 @@ function calculateMotorImpulses(movement) {
   motors[5] = -clamp(movement.upDown, -1, 1);
   //send to motors 
   console.log(motors);
-  motors = convertToPWM(motors);
- motors = scaleMotorPower(motors);
+  motors = motorsJs.convertToPWM(motors);
+ motors = motorsJs.scaleMotorPower(motors);
   motorsJs.setMotorImpulses(motors, motorsJs.pwm);
 }
 
