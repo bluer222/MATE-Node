@@ -113,7 +113,7 @@ wss.on('connection', (ws) => {
 
     }
     else if (message.type === "update") {
-      update();
+      update(send);
     }
   });
   //function for sending messages
@@ -126,7 +126,7 @@ wss.on('connection', (ws) => {
   });
 });
 
-function update() {
+function update(send) {
   hasInternet((connected) => {
     if (connected) {
       send('log', 'updating');

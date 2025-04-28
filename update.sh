@@ -9,12 +9,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_NAME="$(basename "$0")"
 
 # Delete everything except the script itself
+echo "Deleting old files..."
 find "$SCRIPT_DIR" -mindepth 1 -not -name "$SCRIPT_NAME" -exec rm -rf {} +
 
 # Clone the repo into a temp directory
+echo "cloning repo..."
 git clone "$REPO_URL" "$SCRIPT_DIR/$TEMP_DIR"
 
 # Move all files from temp directory to current directory, EXCEPT the script
+echo "Moving files..."
 shopt -s dotglob
 for item in "$SCRIPT_DIR/$TEMP_DIR"/*; do
   basename_item="$(basename "$item")"
