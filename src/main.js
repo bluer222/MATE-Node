@@ -19,6 +19,9 @@ function openSocket() {
         if (message.type === "pong") {
             log("Ping took " + (performance.now() - pingTime) + "ms");
         }
+        if (message.type === "log") {
+            log(message.data);
+        }
     };
 
     //the socked got disconnected(this is bad)
@@ -34,6 +37,9 @@ function openSocket() {
 function ping() {
     pingTime = performance.now();
     send("ping", "ping");
+}
+function update() {
+    send("update", "update");
 }
 
 

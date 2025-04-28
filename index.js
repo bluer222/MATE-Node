@@ -5,6 +5,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
+const https = require('https');
+const { spawn } = require('child_process');
+
 //webcam stuff
 
 const controller = require('./controller.js');
@@ -109,6 +112,9 @@ wss.on('connection', (ws) => {
       send('pong', 'pong');
 
     }
+    else if (message.type === "update") {
+      update();
+    }
   });
   //function for sending messages
   function send(type, data) {
@@ -120,6 +126,45 @@ wss.on('connection', (ws) => {
   });
 });
 
+function update() {
+  hasInternet((connected) => {
+    if (connected) {
+      send('log', 'updating');
+
+      console.log('Internet detected. Starting update...');
+  
+      const scriptPath = path.join(__dirname, 'update.sh');
+  
+      const updater = spawn('bash', [scriptPath], {
+        detached: true,
+        stdio: 'ignore'
+      });
+  
+      updater.unref();
+  
+      process.exit(0);
+    } else {
+      send('log', 'no internet connection, not updating');
+
+      console.log('No internet connection. Aborting.');
+    }
+  });
+}
+function hasInternet(callback) {
+  const req = https.get('https://github.com', { timeout: 3000 }, (res) => {
+    callback(true); // Got a response, we have internet
+    req.destroy();
+  });
+
+  req.on('timeout', () => {
+    req.destroy();
+    callback(false);
+  });
+
+  req.on('error', () => {
+    callback(false);
+  });
+}
 
 //update temperature/ph/whatever
 //ws.send(temp);

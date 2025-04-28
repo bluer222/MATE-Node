@@ -35,7 +35,7 @@ class mapping {
         this.listeners.push(listener);
     }
     resetValues() {
-        for (id in this.ids) {
+        for (let id in this.ids) {
             this.setI(id, 0);
         }
     }
