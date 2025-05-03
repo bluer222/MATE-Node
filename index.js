@@ -37,8 +37,9 @@ let movement = {
   //negitive is left, positive is right
   turn: 0,
   //positive is forward, negitive is backward
-
   forwardBackward: 0,
+  //roll positive is right, negitive is left
+  roll: 0,
 };
 //how much do we want to move in each direction 
 let servos = [
@@ -48,14 +49,26 @@ let servos = [
 //positive is forward, negitive is backward
 let motors = [0, 0, 0, 0, 0, 0];
 controller.buttonMapping.addListener((e) => {
-  //x1
-  if (e.id === 6) {
-    servos[0] = 0.008 + (0.135 - 0.008) * e.value;
+  if (e.id === 6 || e.id === 7) {
+    //x1
+    if (e.id === 6) {
+      servos[0] = 0.008 + (0.135 - 0.008) * e.value;
+    }
+    if (e.id === 7) {
+      servos[1] = 0.008 + (0.135 - 0.008) * e.value;
+    }
+    motorsJs.setServoImpulses(servos, motorsJs.pwm);
+  } else if (e.id === 14 || e.id === 15) {
+    //x1
+    if (e.id === 15) {
+      movement.spin = 0.3 * e.value;
+    }
+    if (e.id === 14) {
+      movement.spin = -0.3 * e.value;
+
+    }
+    calculateMotorImpulses(movement);
   }
-  if (e.id === 7) {
-    servos[1] = 0.008 + (0.135 - 0.008) * e.value;
-  }
-  motorsJs.setServoImpulses(servos, motorsJs.pwm);
 });
 
 controller.axesMapping.addListener((e) => {
@@ -85,12 +98,12 @@ function calculateMotorImpulses(movement) {
   motors[1] = -clamp(movement.forwardBackward + movement.turn - movement.side, -1, 1);
   motors[2] = -clamp(-movement.forwardBackward + movement.turn + movement.side, -1, 1);
   motors[3] = -clamp(-movement.forwardBackward - movement.turn - movement.side, -1, 1);
-  motors[4] = -clamp(movement.upDown, -1, 1);
-  motors[5] = -clamp(movement.upDown, -1, 1);
+  motors[4] = -clamp(movement.upDown + movement.spin, -1, 1);
+  motors[5] = -clamp(movement.upDown - movement.spin, -1, 1);
   //send to motors 
   //console.log(motors);
   motors = motorsJs.convertToPWM(motors);
- motors = motorsJs.scaleMotorPower(motors);
+  motors = motorsJs.scaleMotorPower(motors);
   motorsJs.setMotorImpulses(motors, motorsJs.pwm);
 }
 
@@ -132,16 +145,16 @@ function update(send) {
       send('log', 'updating');
 
       console.log('Internet detected. Starting update...');
-  
+
       const scriptPath = path.join(__dirname, 'update.sh');
-  
+
       const updater = spawn('bash', [scriptPath], {
         detached: true,
         stdio: 'ignore'
       });
-  
+
       updater.unref();
-  
+
       process.exit(0);
     } else {
       send('log', 'no internet connection, not updating');
@@ -174,59 +187,59 @@ function hasInternet(callback) {
 
 
 
-videoStream.detectVideoInputs().then((cameras)=>{
+videoStream.detectVideoInputs().then((cameras) => {
 
   console.log(cameras);
   videoStream.startStreams(cameras, streamPort);
-  
 
-//host the server(just dont touch it)
-const server = http.createServer((req, res) => {
-  //find the file
-  const filePath = path.join(__dirname, 'src', req.url);
-  fs.access(filePath, (err) => {
-    //if the file exists then send it
-    if (err) {
-      res.statusCode = 404;
-      res.setHeader('Content-Type', 'application/json');
-      res.end('File not found');
-    } else {
-      fs.readFile(filePath, (err, data) => {
-        if (err) {
-          res.statusCode = 500;
-          res.setHeader('Content-Type', 'text/plain');
-          res.end('Error reading file');
-        } else {
-          res.statusCode = 200;
-          res.setHeader('Content-Type', getContentType(filePath));
-          let newdata = data.toString().replace('webSocketPort', webSocketPort).replace('streamPort', streamPort).replace('numberOfStreams', cameras.length);
-          res.end(newdata);
-        }
-      });
-    }
+
+  //host the server(just dont touch it)
+  const server = http.createServer((req, res) => {
+    //find the file
+    const filePath = path.join(__dirname, 'src', req.url);
+    fs.access(filePath, (err) => {
+      //if the file exists then send it
+      if (err) {
+        res.statusCode = 404;
+        res.setHeader('Content-Type', 'application/json');
+        res.end('File not found');
+      } else {
+        fs.readFile(filePath, (err, data) => {
+          if (err) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('Error reading file');
+          } else {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', getContentType(filePath));
+            let newdata = data.toString().replace('webSocketPort', webSocketPort).replace('streamPort', streamPort).replace('numberOfStreams', cameras.length);
+            res.end(newdata);
+          }
+        });
+      }
+    });
   });
-});
-//start ruinning the server
-server.listen(filePort, ip, () => {
-  console.log(`Server running at http://${ip}:${filePort}/`);
-});
-const getContentType = (filePath) => {
-  const extname = path.extname(filePath);
-  switch (extname) {
-    case '.html':
-      return 'text/html';
-    case '.css':
-      return 'text/css';
-    case '.js':
-      return 'text/javascript';
-    case '.png':
-      return 'image/png';
-    case '.jpg':
-      return 'image/jpeg';
-    default:
-      return 'application/octet-stream';
-  }
-};
+  //start ruinning the server
+  server.listen(filePort, ip, () => {
+    console.log(`Server running at http://${ip}:${filePort}/`);
+  });
+  const getContentType = (filePath) => {
+    const extname = path.extname(filePath);
+    switch (extname) {
+      case '.html':
+        return 'text/html';
+      case '.css':
+        return 'text/css';
+      case '.js':
+        return 'text/javascript';
+      case '.png':
+        return 'image/png';
+      case '.jpg':
+        return 'image/jpeg';
+      default:
+        return 'application/octet-stream';
+    }
+  };
 });
 
 
